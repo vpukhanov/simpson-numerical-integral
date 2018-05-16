@@ -1,0 +1,162 @@
+﻿<Window x:Class="NumericalIntegral.MainWindow"
+        x:Name="ThisWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:NumericalIntegral"
+        xmlns:oxy="http://oxyplot.org/wpf"
+        xmlns:cv="clr-namespace:NumericalIntegral.Converters"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        mc:Ignorable="d"
+        Title="Численное интегрирование, формула Симпсона (Пуханов Вячеслав, ИТ-31)" Height="600" Width="900" MinWidth="607" MinHeight="528">
+    <Window.Resources>
+        <cv:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+        <cv:DoubleToStringConverter x:Key="DoubleToStringConverter"/>
+        <cv:IntToStringConverter x:Key="IntToStringConverter"/>
+    </Window.Resources>
+    <Grid DataContext="{Binding ElementName=ThisWindow, Path=ViewModel}">
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <!-- входные данные -->
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <!-- параметры функции -->
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+
+                <!-- пределы интегрирования -->
+                <RowDefinition/>
+                <RowDefinition/>
+                
+                <RowDefinition/> <!-- пропуск места -->
+
+                <!-- размеры экрана -->
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+
+                <RowDefinition/> <!-- пропуск места -->
+
+                <!-- n0 и nmax -->
+                <RowDefinition/>
+                <RowDefinition/>
+
+                <!-- точность дельта -->
+                <RowDefinition/>
+
+                <!-- кнопка запуска -->
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="5*"/>
+                <ColumnDefinition Width="32*"/>
+                <ColumnDefinition Width="4*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- входные параметры функции -->
+            <Label Grid.Row="0" Grid.Column="0">α</Label>
+            <TextBox Grid.Row="0" Grid.Column="1" Margin="0,4,0,4" 
+                     IsEnabled="{Binding ElementName=alphaRadioButton, Path=IsChecked, Converter={StaticResource InverseBooleanConverter}, Mode=OneWay}"
+                     Text="{Binding Path=Alpha, Converter={StaticResource DoubleToStringConverter}}"/>
+            <RadioButton Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="alphaRadioButton"
+                         Checked="alphaRadioButton_Checked"/>
+
+            <Label Grid.Row="1" Grid.Column="0">β</Label>
+            <TextBox Grid.Row="1" Grid.Column="1" Margin="0,4,0,4" 
+                     IsEnabled="{Binding ElementName=bettaRadioButton, Path=IsChecked, Converter={StaticResource InverseBooleanConverter}, Mode=OneWay}"
+                     Text="{Binding Path=Betta, Converter={StaticResource DoubleToStringConverter}}"/>
+            <RadioButton Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="True" x:Name="bettaRadioButton"
+                         Checked="bettaRadioButton_Checked"/>
+
+            <Label Grid.Row="2" Grid.Column="0">γ</Label>
+            <TextBox Grid.Row="2" Grid.Column="1" Margin="0,4,0,4" 
+                     IsEnabled="{Binding ElementName=gammaRadioButton, Path=IsChecked, Converter={StaticResource InverseBooleanConverter}, Mode=OneWay}"
+                     Text="{Binding Path=Gamma, Converter={StaticResource DoubleToStringConverter}}"/>
+            <RadioButton Grid.Row="2" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="gammaRadioButton"
+                         Checked="gammaRadioButton_Checked"/>
+
+            <Label Grid.Row="3" Grid.Column="0">δ</Label>
+            <TextBox Grid.Row="3" Grid.Column="1" Margin="0,4,0,4" 
+                     IsEnabled="{Binding ElementName=deltaRadioButton, Path=IsChecked, Converter={StaticResource InverseBooleanConverter}, Mode=OneWay}"
+                     Text="{Binding Path=Delta, Converter={StaticResource DoubleToStringConverter}}"/>
+            <RadioButton Grid.Row="3" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="deltaRadioButton"
+                         Checked="deltaRadioButton_Checked"/>
+
+            <Label Grid.Row="4" Grid.Column="0">ε</Label>
+            <TextBox Grid.Row="4" Grid.Column="1" Margin="0,4,0,4" 
+                     IsEnabled="{Binding ElementName=epsilonRadioButton, Path=IsChecked, Converter={StaticResource InverseBooleanConverter}, Mode=OneWay}"
+                     Text="{Binding Path=Epsilon, Converter={StaticResource DoubleToStringConverter}}"/>
+            <RadioButton Grid.Row="4" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="epsilonRadioButton"
+                         Checked="epsilonRadioButton_Checked"/>
+
+            <Label Grid.Row="5" Grid.Column="0">a</Label>
+            <TextBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,4,4,4"
+                     Text="{Binding Path=IntegralStart, Converter={StaticResource DoubleToStringConverter}}"/>
+
+            <Label Grid.Row="6" Grid.Column="0">b</Label>
+            <TextBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,4,4,4"
+                     Text="{Binding Path=IntegralEnd, Converter={StaticResource DoubleToStringConverter}}"/>
+            
+            <!-- размеры экрана -->
+            <Label Grid.Row="8" Grid.Column="0">A</Label>
+            <TextBox Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,4,4,4"
+                     Text="{Binding Path=LeftBorder, Converter={StaticResource DoubleToStringConverter}}"/>
+
+            <Label Grid.Row="9" Grid.Column="0">B</Label>
+            <TextBox Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,4,4,4"
+                     Text="{Binding Path=RightBorder, Converter={StaticResource DoubleToStringConverter}}"/>
+
+            <Label Grid.Row="10" Grid.Column="0">C</Label>
+            <TextBox Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,4,4,4"
+                     Text="{Binding Path=BottomBorder, Converter={StaticResource DoubleToStringConverter}}"/>
+
+            <Label Grid.Row="11" Grid.Column="0">D</Label>
+            <TextBox Grid.Row="11" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,4,4,4"
+                     Text="{Binding Path=TopBorder, Converter={StaticResource DoubleToStringConverter}}"/>
+            
+            <!-- n0, nmax и дельта -->
+            <Label Grid.Row="13" Grid.Column="0">n₀</Label>
+            <TextBox Grid.Row="13" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,4,4,4"
+                     Text="{Binding Path=InitialNumberOfParts, Converter={StaticResource IntToStringConverter}}"/>
+
+            <Label Grid.Row="14" Grid.Column="0">nₘ</Label>
+            <TextBox Grid.Row="14" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,4,4,4" IsEnabled="False"
+                     Text="{Binding Path=MaximumNumberOfParts, Converter={StaticResource IntToStringConverter}, Mode=OneWay}"/>
+
+            <Label Grid.Row="15" Grid.Column="0">Δ</Label>
+            <ComboBox Grid.Row="15" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,4,4,4"
+                      SelectedValue="{Binding Path=CalculationError, Converter={StaticResource DoubleToStringConverter}}">
+                <sys:String>1</sys:String>
+                <sys:String>0,1</sys:String>
+                <sys:String>0,01</sys:String>
+                <sys:String>0,001</sys:String>
+                <sys:String>0,0001</sys:String>
+            </ComboBox>
+            
+            <!-- кнопка запуска -->
+            <Button x:Name="plotButton" Grid.Row="16" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,4,4,4" Click="plotButton_Click">Построить</Button>
+        </Grid>
+
+        <!-- выходной график -->
+        <oxy:Plot Grid.Column="1" x:Name="plotCanvas" IsMouseWheelEnabled="False">
+            <oxy:Plot.Axes>
+                <oxy:LinearAxis Position="Bottom" Minimum="{Binding Path=LeftBorder, Mode=OneWay}" Maximum="{Binding Path=RightBorder, Mode=OneWay}"/>
+                <oxy:LinearAxis Position="Left" Minimum="{Binding Path=BottomBorder, Mode=OneWay}" Maximum="{Binding Path=TopBorder, Mode=OneWay}"/>
+            </oxy:Plot.Axes>
+            <oxy:Plot.Series>
+                <oxy:LineSeries ItemsSource="{Binding Path=DataPoints, Mode=OneWay}" Color="Red"/>
+            </oxy:Plot.Series>
+        </oxy:Plot>
+    </Grid>
+</Window>
